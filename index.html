@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Aspect Ratio Calculator</title>
+    <style>
+        /* Basic styling for a clean interface */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #dropZone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        #imagePreview {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Aspect Ratio Calculator</h1>
+    <div id="dropZone">
+        <p>Drag and drop an image here, or click to select a file</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+    <div id="result"></div>
+    <img id="imagePreview" src="" alt="Image preview" style="display: none;">
+
+    <script>
+        // Get references to DOM elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const result = document.getElementById('result');
+        const imagePreview = document.getElementById('imagePreview');
+
+        // Add event listeners for drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#999';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#ccc';
+        });
+
+        dropZone.addEventListener('drop', handleFile);
+
+        // Add event listener for file input change
+        fileInput.addEventListener('change', handleFile);
+
+        // Add click event to dropZone to trigger file input
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        function handleFile(e) {
+            e.preventDefault();
+            dropZone.style.borderColor = '#ccc';
+
+            let file;
+            if (e.dataTransfer) {
+                file = e.dataTransfer.files[0];
+            } else {
+                file = e.target.files[0];
+            }
+
+            if (file && file.type.match('image.*')) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        displayImageInfo(this.width, this.height);
+                    }
+                    img.src = e.target.result;
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayImageInfo(width, height) {
+            // Calculate aspect ratio
+            const gcd = calculateGCD(width, height);
+            const aspectRatio = `${width / gcd}:${height / gcd}`;
+
+            // Display results
+            result.innerHTML = `
+                <h3>Image Information:</h3>
+                <p><strong>Dimensions:</strong> ${width} x ${height} pixels</p>
+                <p><strong>Aspect Ratio:</strong> ${aspectRatio}</p>
+            `;
+        }
+
+        // Calculate the Greatest Common Divisor (GCD) for aspect ratio simplification
+        function calculateGCD(a, b) {
+            return b === 0 ? a : calculateGCD(b, a % b);
+        }
+    </script>
+</body>
+</html>
